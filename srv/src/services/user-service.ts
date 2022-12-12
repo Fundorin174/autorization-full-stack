@@ -6,30 +6,43 @@ import {v4} from 'uuid';
 import mailService from "./mail-service";
 import tokenService from "./token-service";
 import UserDto from './../dtos/user-dto';
+import ApiError from "./../exeptions/api-error";
 
 class UserService {
   async registration(email: string, password: string, name: string, surname: string) {
     // check is already exist
     const candidate: QueryResult<User> = await db.query('SELECT * from person where email = $1', [email]);
     if (candidate.rows[0]) {
-      throw new Error(`User with email: ${email} already exist`)
+      throw ApiError.BadRequest(`User with email: ${email} already exist`)
     }
     // crypt password
     const hashPassword = await bcrypt.hash(password, 3);
     // create activation Link
-    const activationLink = v4();
+    const activationlink = v4();
     // create new User
-    const user: QueryResult<User> = await db.query(`INSERT INTO person (email, password, isActivated, activationLink, name, surname) values ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [email, hashPassword, false, activationLink, name, surname]);
+    const user: QueryResult<User> = await db.query(`INSERT INTO person (email, password, isactivated, activationlink, name, surname) values ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [email, hashPassword, false, activationlink, name, surname]);
     // send mail to user with activation link 
-    await mailService.sendActivationMail(email, activationLink);
+    await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationlink}`);
     const userDto = new UserDto(user.rows[0]);
     // generate tokens 
     const tokens = tokenService.generateTokens({...userDto} as TokenPayload);
     // save token
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+    await tokenService.saveToken(userDto.id, tokens.refreshtoken);
     
     return {...tokens, user: userDto }
+  }
+
+  async activate(activationlink: string) {
+    
+    const user: QueryResult<User> = await db.query('SELECT * from person where activationlink = $1', [activationlink]);
+
+    if (!user.rows[0]) {
+      throw ApiError.BadRequest('Incorect Activation link')
+    }
+    //update user
+    const activatedUser: QueryResult<User> = await db.query('UPDATE person SET isactivated = $1 WHERE id = $2 RETURNING *', 
+    [true, user.rows[0].id]);
   }
 }
 

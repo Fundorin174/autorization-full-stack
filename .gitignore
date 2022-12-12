@@ -1,3 +1,5 @@
 /srv/node_modules
 /srv/dist
 /ui/node_modules
+/var
+/postgres-data

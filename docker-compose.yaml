@@ -1,11 +1,30 @@
-version: '3.8'
+version: '3.7'
 
 services:
-  db_auth:
-    container_name: db_auth
-    ports:
-      - "${ACC_DB_PORT}:${ACC_DB_PORT}"
+  postgres:
+    image: postgres:15.1-bullseye
+    restart: always 
     environment:
       - POSTGRES_PASSWORD=${ACC_POSTGRES_PASSWORD}
-      - POSTGRES_USER=${ACC_POSTGRES_USER}
-    image: postgres:15.1-bullseye
+      - POSTGRES_USER=${ACC_POSTGRES_USER} 
+      - POSTGRES_DB=${ACC_POSTGRES_DB_NAME}    
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    volumes: 
+      - ./postgres-data:/var/lib/postgresql/data
+      # copy the sql script to create tables
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+  pgadmin-compose:
+        image: dpage/pgadmin4
+        environment: 
+            PGADMIN_DEFAULT_EMAIL: "admin@gmail.com"
+            PGADMIN_DEFAULT_PASSWORD: "root"
+        ports: 
+            - "16543:80"
+        depends_on: 
+            - postgres    
+ 

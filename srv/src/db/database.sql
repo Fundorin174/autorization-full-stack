@@ -1,9 +1,4 @@
-SET client_encoding = 'UTF8';
-
-DROP TABLE IF EXISTS person;
-
-CREATE TABLE
-    person(
+CREATE TABLE IF NOT EXISTS person (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
@@ -13,8 +8,7 @@ CREATE TABLE
         surname VARCHAR(255)
     );
 
-CREATE TABLE
-    token(
+CREATE TABLE IF NOT EXISTS token(
         id SERIAL PRIMARY KEY,
         refreshToken VARCHAR(255) NOT NULL,
         userId INTEGER,

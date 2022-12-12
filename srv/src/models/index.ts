@@ -2,14 +2,14 @@ interface User {
   id: number;
   email: string;
   password: string;
-  isActivated: boolean;
+  isactivated: boolean;
   activationLink: string;
   name: string;
   surname: string;
 }
 
 interface Token {
-  refreshToken: string;
+  refreshtoken: string;
   userId: string;
 }
 
