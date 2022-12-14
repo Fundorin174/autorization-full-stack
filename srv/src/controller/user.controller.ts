@@ -3,10 +3,17 @@ import { QueryResult } from 'pg';
 import userService from './../services/user-service';
 import db from './../db/db';
 import { User } from './../models'
+import { ValidationError, validationResult } from 'express-validator';
+import ApiError from './../exeptions/api-error';
 class UserController {
+  
   async registration(req: Request, res: Response, next: NextFunction) {
     const refreshPeriod = 30*24*60*60*1000 // 30 days in ms
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return next(ApiError.BadRequest('Validation error', errors.array()));
+      }
       const {email, password, name, surname} = req.body;
       const userData = await userService.registration(email, password, name, surname);
       // save refresh token in cookie
@@ -17,16 +24,25 @@ class UserController {
     }
   }
   async login(req: Request, res: Response, next: NextFunction) {
-
+    const refreshPeriod = 30*24*60*60*1000 // 30 days in ms
     try {
-
+      const {email, password} = req.body;
+      const userData = await userService.login(email, password);
+      // save refresh token in cookie
+      res.cookie('refreshtoken', userData.refreshtoken, {maxAge: refreshPeriod, httpOnly: true});
+      return res.json(userData);
     } catch (error) {
       next(error);
     }
   }
   async logout(req: Request, res: Response, next: NextFunction) {
-
     try {
+      const {refreshtoken} = req.cookies;
+      if (refreshtoken) {
+        const token = await userService.logout(refreshtoken);
+        res.clearCookie('refreshtoken');
+        return res.json(token);
+      }
 
     } catch (error) {
       next(error);
@@ -50,19 +66,11 @@ class UserController {
       next(error);
     }
   }
-  // async createUser(req: Request, res: Response) {
-  //   const { name, surname } = req.body as User;
-  //   try {
-  //     const newPerson: QueryResult<User> = await db.query(`INSERT INTO person (name, surname) values ($1, $2) RETURNING *`, [name, surname])
-  //     res.json(newPerson.rows[0]);
-  //   } catch (error) {
-  //     res.status(500).json(error);
-  //   }
-  // }
+
   async getUsers(req: Request, res: Response, next: NextFunction) {
     try {
-      const users: QueryResult<User> = await db.query('SELECT * from person')
-      res.json(users.rows)
+      const userData = await userService.getUsers();      
+      res.json(userData);
     } catch (error) {
       next(error);
     }

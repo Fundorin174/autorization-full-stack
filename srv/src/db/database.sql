@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS person (
 
 CREATE TABLE IF NOT EXISTS token(
         id SERIAL PRIMARY KEY,
-        refreshToken VARCHAR(255) NOT NULL,
+        refreshToken VARCHAR NOT NULL,
         userId INTEGER,
-        FOREIGN KEY (userId) REFERENCES person (id),
+        FOREIGN KEY (userId) REFERENCES person (id)
     );

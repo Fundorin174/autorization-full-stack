@@ -11,7 +11,7 @@ CREATE TABLE person (
 
 CREATE TABLE token (
   id SERIAL PRIMARY KEY,
-  refreshtoken VARCHAR(255) NOT NULL,
+  refreshtoken VARCHAR NOT NULL,
   userid SERIAL,
   CONSTRAINT fk_id
     FOREIGN KEY(userId)

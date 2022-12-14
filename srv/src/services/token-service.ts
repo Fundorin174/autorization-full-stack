@@ -18,10 +18,15 @@ class TokenService {
     const tokenData: QueryResult<Token> = await db.query('SELECT * from token where userId = $1', [userId]);
     if (tokenData.rows[0]) {
       tokenData.rows[0].refreshtoken = refreshtoken;
-      const token: QueryResult<Token> = await db.query('UPDATE token set refreshToken = $1 where userId = $2 RETURNING *', [refreshtoken, userId]);
+      const token: QueryResult<Token> = await db.query('UPDATE token set refreshtoken = $1 where userId = $2 RETURNING *', [refreshtoken, userId]);
       return token.rows[0];
     }
-    const token: QueryResult<Token> = await db.query(`INSERT INTO token (refreshToken, userId) values ($1, $2) RETURNING *`, [refreshtoken, userId])
+    const token: QueryResult<Token> = await db.query(`INSERT INTO token (refreshtoken, userId) values ($1, $2) RETURNING *`, [refreshtoken, userId])
+    return token.rows[0];
+  }
+
+  async deleteToken(refreshtoken: string) {
+    const token: QueryResult<Token> = await db.query('DELETE from token where refreshtoken = $1', [refreshtoken])
     return token.rows[0];
   }
 }
