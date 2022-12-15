@@ -59,9 +59,13 @@ class UserController {
     }
   }
   async refresh(req: Request, res: Response, next: NextFunction) {
-
+    const refreshPeriod = 30*24*60*60*1000 // 30 days in ms
     try {
-
+      const {refreshtoken} = req.cookies;
+      const userData = await userService.refresh(refreshtoken);
+      // save refresh token in cookie
+      res.cookie('refreshtoken', userData.refreshtoken, {maxAge: refreshPeriod, httpOnly: true});
+      return res.json(userData);
     } catch (error) {
       next(error);
     }

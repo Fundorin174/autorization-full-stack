@@ -65,9 +65,26 @@ class UserService {
     
     return {...tokens, user: userDto }
   }
-  async logout(refreshToken: string) {
-    const token: Token = await tokenService.deleteToken(refreshToken);
+  async logout(refreshtoken: string) {
+    const token: Token = await tokenService.deleteToken(refreshtoken);
     return token;
+  }
+  async refresh(refreshtoken: string) {
+    if (!refreshtoken) {
+      throw ApiError.UnautorizedError();
+    }
+    const userData = tokenService.validateRefreshToken(refreshtoken);
+    const tokenFromDB = tokenService.findToken(refreshtoken);
+    if (! userData || ! tokenFromDB) {
+      throw ApiError.UnautorizedError();
+    }
+    const user = await db.query('SELECT * from person where id = $1', [userData.id]);
+    const userDto = new UserDto(user.rows[0]);
+    // generate tokens 
+    const tokens = tokenService.generateTokens({...userDto} as TokenPayload);
+    // save token
+    await tokenService.saveToken(userDto.id, tokens.refreshtoken);
+    return {...tokens, user: userDto};
   }
   async getUsers() {
     const users: QueryResult<User> = await db.query('SELECT * from person')

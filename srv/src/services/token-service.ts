@@ -1,6 +1,6 @@
 require('dotenv').config();
-import jwt, { Secret } from 'jsonwebtoken';
-import { Token, TokenPayload } from 'models';
+import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
+import { Token, TokenPayload, User } from 'models';
 import { QueryResult } from 'pg';
 import db from './../db/db';
 
@@ -10,6 +10,24 @@ class TokenService {
     const refreshtoken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET as Secret, { expiresIn: '60d' });
     return {
       accesstoken, refreshtoken
+    }
+  }
+
+  validateAccessToken(token: string) {
+    try {
+      const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET as Secret) as User;
+      return userData;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  validateRefreshToken(token: string) {
+    try {
+      const userData = jwt.verify(token, process.env.JWT_REFRESH_SECRET as Secret) as User;
+      return userData;
+    } catch (error) {
+      return null;
     }
   }
 
@@ -26,7 +44,11 @@ class TokenService {
   }
 
   async deleteToken(refreshtoken: string) {
-    const token: QueryResult<Token> = await db.query('DELETE from token where refreshtoken = $1', [refreshtoken])
+    const token: QueryResult<Token> = await db.query('DELETE from token where refreshtoken = $1', [refreshtoken]);
+    return token.rows[0];
+  }
+  async findToken(refreshtoken: string) {
+    const token: QueryResult<Token> = await db.query('SELECT * from token where refreshtoken = $1', [refreshtoken]);
     return token.rows[0];
   }
 }
