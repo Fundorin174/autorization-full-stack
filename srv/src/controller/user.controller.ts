@@ -82,8 +82,8 @@ class UserController {
   async getUser(req: Request, res: Response, next: NextFunction) {
     const id = req.params.id;
     try {
-      const user: QueryResult<User> = await db.query('SELECT * from person where id = $1', [id]);
-      res.json(user.rows[0]);
+      const userData = await userService.getUser(+id);      
+      res.json(userData);
     } catch (error) {
       next(error);
     }
@@ -91,18 +91,17 @@ class UserController {
   async updateUser(req: Request, res: Response, next: NextFunction) {
     const { id, name, surname } = req.body as User
     try {
-      const user: QueryResult<User> = await db.query('UPDATE person set name = $1, surname = $2 where id = $3 RETURNING *', 
-      [name, surname, id]);
-      res.json(user.rows[0]);
+      const userData = await userService.updateUser(+id, name, surname);    
+      res.json(userData);
     } catch (error) {
       next(error);
     }
   }
   async deleteUser(req: Request, res: Response, next: NextFunction) {
-    const id = req.params.id;
+    const id = +req.params.id;
     try {
-      const user: QueryResult<User> = await db.query('DELETE from person where id = $1', [id]);
-      res.json(user.rows[0]);
+      const userData = await userService.deleteUser(id);
+      res.json(userData);
     } catch (error) {
       next(error);
     }

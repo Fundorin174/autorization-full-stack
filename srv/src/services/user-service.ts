@@ -89,7 +89,20 @@ class UserService {
   async getUsers() {
     const users: QueryResult<User> = await db.query('SELECT * from person')
 
-    return users.rows[0];
+    return users.rows;
+  }
+  async getUser(id: number) {
+    const user: QueryResult<User> = await db.query('SELECT * from person where id = $1', [id]);
+    return user.rows[0];
+  }
+  async deleteUser(id: number) {
+    const user: QueryResult<User> = await db.query('DELETE from person where id = $1', [id]);
+    return user.rows[0];
+  }
+  async updateUser(id: number, name: string, surname: string) {
+    const user: QueryResult<User> = await db.query('UPDATE person set name = $1, surname = $2 where id = $3 RETURNING *', 
+      [name, surname, id]);
+    return user.rows[0];
   }
 }
 
