@@ -1,5 +1,3 @@
-import { CorsRequest } from 'cors';
-import { Request, Response } from 'express';
 import * as express from 'express';
 import userController from '../controller/user.controller';
 import { body } from 'express-validator';
@@ -16,7 +14,7 @@ router.post('/login', userController.login);
 router.post('/logout', userController.logout);
 router.post('/activate/:link', userController.activate);
 router.get('/refresh', userController.refresh);
-router.get('/user', authMiddlware, userController.getUsers);
+router.get('/user', userController.getUsers);
 router.get('/user/:id', authMiddlware, userController.getUser);
 router.put('/user', authMiddlware, userController.updateUser);
 router.delete('/user/:id', authMiddlware, userController.deleteUser);

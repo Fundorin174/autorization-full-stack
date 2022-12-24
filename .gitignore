@@ -3,3 +3,4 @@
 /ui/node_modules
 /var
 /postgres-data
+.env
