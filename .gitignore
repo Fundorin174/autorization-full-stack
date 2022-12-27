@@ -4,3 +4,5 @@
 /var
 /postgres-data
 .env
+/srv/src/.env
+/ui/src/.env

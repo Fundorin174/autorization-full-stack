@@ -3,7 +3,6 @@ import { QueryResult } from "pg";
 import db from './../db/db';
 import bcrypt from "bcrypt";
 import {v4} from 'uuid';
-import mailService from "./mail-service";
 import tokenService from "./token-service";
 import UserDto from './../dtos/user-dto';
 import ApiError from "./../exeptions/api-error";
@@ -23,7 +22,7 @@ class UserService {
     const user: QueryResult<User> = await db.query(`INSERT INTO person (email, password, isactivated, activationlink, name, surname) values ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [email, hashPassword, false, activationlink, name, surname]);
     // send mail to user with activation link 
-    // beckouse it is bad email sendler
+    // beckause it is bad email sandler
     //await mailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationlink}`);
     await this.activate(activationlink)// only for showing
     const userDto = new UserDto(user.rows[0]);
@@ -73,6 +72,7 @@ class UserService {
     if (!refreshtoken) {
       throw ApiError.UnautorizedError();
     }
+
     const userData = tokenService.validateRefreshToken(refreshtoken);
     const tokenFromDB = tokenService.findToken(refreshtoken);
     if (! userData || ! tokenFromDB) {

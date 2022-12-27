@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { QueryResult } from 'pg';
 import userService from './../services/user-service';
-import db from './../db/db';
-import { User } from './../models'
-import { ValidationError, validationResult } from 'express-validator';
+import { User } from '../models'
+import {  validationResult } from 'express-validator';
 import ApiError from './../exeptions/api-error';
 class UserController {
   
@@ -59,9 +57,11 @@ class UserController {
     }
   }
   async refresh(req: Request, res: Response, next: NextFunction) {
+
     const refreshPeriod = 30*24*60*60*1000 // 30 days in ms
     try {
       const {refreshtoken} = req.cookies;
+
       const userData = await userService.refresh(refreshtoken);
       // save refresh token in cookie
       res.cookie('refreshtoken', userData.refreshtoken, {maxAge: refreshPeriod, httpOnly: true});

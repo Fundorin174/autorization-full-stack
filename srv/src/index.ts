@@ -13,8 +13,8 @@ app.use(cors({
     credentials: true,
     origin: process.env.CLIENT_URL,
 }));
-app.use('/api', userRouter);
 app.use(cookieParser());
+app.use('/api', userRouter);
 app.use(errorMiddleware);
 
 const start = async () =>{
