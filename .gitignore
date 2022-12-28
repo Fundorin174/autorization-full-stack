@@ -1,8 +1,4 @@
+/postgres-data
 /srv/node_modules
 /srv/dist
 /ui/node_modules
-/var
-/postgres-data
-.env
-/srv/src/.env
-/ui/src/.env
